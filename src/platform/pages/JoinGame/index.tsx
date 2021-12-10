@@ -8,9 +8,8 @@ import { history } from 'App';
 import firebase from 'firebase/app';
 import HomePage from 'platform/pages/Home/HomePage';
 import FBService from 'platform/service/MyFirebaseService';
-import { Centered } from 'platform/style/StyledComponents';
 import { HomeButton, Title } from 'platform/style/StyledMui';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Page } from 'shared/enums';
 import { AppContext } from 'shared/hooks';
@@ -50,12 +49,8 @@ const JoinGame = () => {
 	}
 
 	const markup = () => (
-		<Centered className="join-game-panel">
-			<Title
-				title={title}
-				variant="h6"
-				padding="5px"
-			/>
+		<Fragment key="join-game">
+			<Title title={title} variant="h6" padding="5px" />
 			<Collapse in={user && gameInvites?.length > 0} timeout={400}>
 				<List dense className="list">
 					{gameInvites?.map(game => (
@@ -76,7 +71,7 @@ const JoinGame = () => {
 				</List>
 			</Collapse>
 			<HomeButton />
-		</Centered>
+		</Fragment>
 	);
 
 	return <HomePage markup={markup} timeout={2000} />;

@@ -34,34 +34,26 @@ const NewGame = () => {
 	}, []);
 
 	function handleRemovePlayer(player: User) {
-		function isNotUserToRemove(userToRemove: User) {
-			return player.uN !== userToRemove.uN;
-		}
-		setPlayers(players.filter(isNotUserToRemove));
+		setPlayers(players.filter(p => player.uN !== p.uN));
 		setStartedGame(false);
 	}
 
-	async function startGame() {
-		await FBService.createGame(user, players, random).then(game => {
-			game.prepForNewRound(true);
-			game.initRound();
-			FBService.updateGame(game).then(() => {
-				setGameId(game.id);
-			});
-			setStartedGame(true);
-		});
-	}
-
-	function handleStartJoinClick() {
+	async function handleStartJoinClick() {
 		if (startedGame) {
 			history.push(Page.TABLE);
 			setPlayers([user]);
 		} else {
-			startGame();
+			await FBService.createGame(user, players, random).then(game => {
+				game.prepForNewRound(true);
+				game.initRound();
+				FBService.updateGame(game).then(() => {
+					setGameId(game.id);
+				});
+				setStartedGame(true);
+			});
 		}
 	}
 
-	// Note: to effect the animation, this cannot be returned as a FC
 	const renderUserOption = (player: User) => (
 		<ListItem className="user list-item">
 			<ListItemText primary={player?.uN} />
@@ -85,35 +77,6 @@ const NewGame = () => {
 		</ListItem>
 	);
 
-	const startButton = () => (
-		<Fade in={players.length === 4} timeout={300}>
-			<div id="start-join-btn">
-				<StyledButton
-					label={startedGame ? 'Join' : 'Start'}
-					onClick={handleStartJoinClick}
-					disabled={players.length < 4}
-				/>
-			</div>
-		</Fade>
-	);
-
-	const renderBottomButtons = () => (
-		<Fade in timeout={20}>
-			<Row style={{ paddingTop: 5, transition: '300ms' }} id="bottom-btns">
-				<HomeButton
-					style={{
-						marginLeft:
-							players?.length < 4
-								? document.getElementById('start-join-btn')?.getBoundingClientRect()?.width || 64
-								: 0,
-						transition: '450ms'
-					}}
-				/>
-				{startButton()}
-			</Row>
-		</Fade>
-	);
-
 	const renderRandomizeOption = () => (
 		<Fade in={players.length === 4} timeout={{ enter: 1.8 * fadeTimeout }} unmountOnExit>
 			<ListItem className="user list-item">
@@ -131,8 +94,31 @@ const NewGame = () => {
 		</Fade>
 	);
 
+	const renderBottomButtons = () => (
+		<Row style={{ paddingTop: 5, transition: '300ms' }} id="bottom-btns">
+			<HomeButton
+				style={{
+					marginLeft:
+						players?.length < 4
+							? document.getElementById('start-join-btn')?.getBoundingClientRect()?.width || 64
+							: 0,
+					transition: '450ms'
+				}}
+			/>
+			<Fade in={players.length === 4} timeout={300}>
+				<div id="start-join-btn">
+					<StyledButton
+						label={startedGame ? 'Join' : 'Start'}
+						onClick={handleStartJoinClick}
+						disabled={players.length < 4}
+					/>
+				</div>
+			</Fade>
+		</Row>
+	);
+
 	const markup = () => (
-		<>
+		<Fragment key="new-game">
 			<Title title="Create a new game" padding="5px" />
 			<div className="panels">
 				<div className="panel-segment">
@@ -143,13 +129,12 @@ const NewGame = () => {
 					<List className="list">
 						{players.map((player, index) => (
 							<Fragment key={`player-${index}`}>
-								{playersRef.current?.find(p => p?.uN === player?.uN) ? (
-									renderUserOption(player)
-								) : (
-									<Fade in timeout={fadeTimeout}>
-										{renderUserOption(player)}
-									</Fade>
-								)}
+								<Fade
+									in
+									timeout={playersRef.current?.find(p => p?.uN === player?.uN) ? 0 : fadeTimeout}
+								>
+									{renderUserOption(player)}
+								</Fade>
 							</Fragment>
 						))}
 						{renderRandomizeOption()}
@@ -157,7 +142,7 @@ const NewGame = () => {
 				</div>
 			</div>
 			{renderBottomButtons()}
-		</>
+		</Fragment>
 	);
 
 	return <HomePage markup={markup} offsetKeyboard={offsetKeyboard + 18} />;

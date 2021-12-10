@@ -14,21 +14,9 @@ import './login.scss';
 const Login = () => {
 	const { login, setUserEmail, alert, setAlert } = useContext(AppContext);
 	const [showRegister, setShowRegister] = useState(false);
-	const [offsetKeyboard, setOffsetKeyboard] = useState(44.5);
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
-
-	useEffect(() => {
-		setConfirmPassword('');
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [showRegister]);
-
-	useEffect(() => {
-		const buttonsHeight = document.getElementById('bottom-btns')?.getBoundingClientRect()?.height;
-		console.log(buttonsHeight);
-		setOffsetKeyboard(buttonsHeight);
-	}, []);
 
 	function clearForm() {
 		setEmail('');
@@ -177,7 +165,13 @@ const Login = () => {
 		</>
 	);
 
-	return <HomePage markup={markup} skipVerification offsetKeyboard={offsetKeyboard + 10} />;
+	return (
+		<HomePage
+			markup={markup}
+			skipVerification
+			offsetKeyboard={document.getElementById('bottom-btns')?.getBoundingClientRect()?.height || 44.5 + 10}
+		/>
+	);
 };
 
 export default Login;

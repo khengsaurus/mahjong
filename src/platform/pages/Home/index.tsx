@@ -2,7 +2,7 @@ import { history } from 'App';
 import SettingsWindow from 'platform/components/SettingsWindow/SettingsWindow';
 import { PlatformSpecs } from 'platform/style/StyledComponents';
 import { JoinGameButton, StyledButton, Title } from 'platform/style/StyledMui';
-import React, { useContext, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { Page } from 'shared/enums';
 import { AppContext } from 'shared/hooks';
 import './home.scss';
@@ -18,7 +18,7 @@ const Home = () => {
 	}
 
 	const markup = () => (
-		<>
+		<Fragment key="home">
 			<Title title={`Welcome ${user?.uN || ''}`} />
 			<StyledButton label={'New Game'} navigate={Page.NEWGAME} />
 			<JoinGameButton />
@@ -36,7 +36,7 @@ const Home = () => {
 					}}
 				/>
 			)}
-		</>
+		</Fragment>
 	);
 
 	return <HomePage markup={markup} />;

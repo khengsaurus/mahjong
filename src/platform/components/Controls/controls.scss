@@ -88,7 +88,7 @@
 			max-width: getLogLineWidth($size);
 			font-size: getTextFontSize($size);
 			line-height: getTextLineHeight($size);
-			transition: 200ms;
+			transition: 300ms;
 			&.expanded {
 				@include align-items-text(flex-start, start);
 				height: 4 * getIconButtonSize($size);

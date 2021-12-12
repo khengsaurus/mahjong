@@ -1,10 +1,11 @@
 import Collapse from '@material-ui/core/Collapse';
+import Fade from '@material-ui/core/Fade';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 import { history } from 'App';
 import { Row } from 'platform/style/StyledComponents';
 import { StyledButton, Title } from 'platform/style/StyledMui';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useContext, useEffect, useState } from 'react';
 import { Page, Status } from 'shared/enums';
 import { AppContext } from 'shared/hooks';
 import { FBAuthLogin_EmailPass, FBAuthRegister_EmailPass, FBResolveUser_Email } from 'shared/service/fbUserFns';
@@ -13,12 +14,12 @@ import './login.scss';
 
 const Login = () => {
 	const { login, setUserEmail, alert, setAlert } = useContext(AppContext);
-	const [ready, setReady] = useState(true);
+	const [showRegister, setShowRegister] = useState(false);
+	// const [offsetKeyboard, setOffsetKeyboard] = useState(44.5);
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
-	const [showRegister, setShowRegister] = useState(false);
-	// const [offsetKeyboard, setOffsetKeyboard] = useState(44.5);
+	const [ready, setReady] = useState(true);
 
 	useEffect(() => {
 		setConfirmPassword('');
@@ -26,8 +27,8 @@ const Login = () => {
 	}, [showRegister]);
 
 	// useEffect(() => {
-	// 	const buttonsHeight = document.getElementById('bottom-btns')?.getBoundingClientRect()?.height;
-	// 	setOffsetKeyboard(buttonsHeight);
+	//  const buttonsHeight = document.getElementById('bottom-btns')?.getBoundingClientRect()?.height;
+	//  setOffsetKeyboard(buttonsHeight);
 	// }, []);
 
 	const loginDisabled = useMemo(() => email.trim() === '' || password.trim() === '', [email, password]);
@@ -125,11 +126,49 @@ const Login = () => {
 	}, [enterListener]);
 
 	const renderLoginButton = () => (
-		<StyledButton label={`Login`} type="submit" autoFocus disabled={loginDisabled} onClick={handleSubmit} />
+		<Fade in={!showRegister && !loginDisabled} timeout={300}>
+			<div id="login-btn">
+				<StyledButton label={`Login`} type="submit" autoFocus disabled={loginDisabled} onClick={handleSubmit} />
+			</div>
+		</Fade>
 	);
 
 	const renderRegisterButton = () => (
-		<StyledButton label={`Register`} type="submit" autoFocus disabled={registerDisabled} onClick={handleSubmit} />
+		<Fade in={showRegister && !registerDisabled} timeout={300}>
+			<div id="register-btn">
+				<StyledButton
+					label={`Register`}
+					type="submit"
+					autoFocus
+					disabled={registerDisabled}
+					onClick={handleSubmit}
+				/>
+			</div>
+		</Fade>
+	);
+
+	const renderBottomButtons = () => (
+		<Fade in timeout={20}>
+			<Row style={{ paddingTop: 5, transition: '300ms' }} id="bottom-btns">
+				<StyledButton
+					label={showRegister ? `Back` : `Register`}
+					onClick={() => {
+						setAlert(null);
+						setShowRegister(!showRegister);
+					}}
+					style={{
+						marginLeft:
+							showRegister && registerDisabled
+								? document.getElementById('register-btn')?.getBoundingClientRect()?.width || 86.36
+								: !showRegister && loginDisabled
+								? document.getElementById('login-btn')?.getBoundingClientRect()?.width || 64
+								: 0,
+						transition: '300ms'
+					}}
+				/>
+				{showRegister ? renderRegisterButton() : renderLoginButton()}
+			</Row>
+		</Fade>
 	);
 
 	const markup = () => (
@@ -167,15 +206,8 @@ const Login = () => {
 					style={{ margin: '5px 0' }}
 				/>
 			</Collapse>
-			<Row style={{ paddingTop: 10, width: '100%', justifyContent: 'space-evenly' }} id="bottom-btns">
-				<StyledButton
-					label={showRegister ? `Back` : `Register`}
-					onClick={() => {
-						setAlert(null);
-						setShowRegister(!showRegister);
-					}}
-				/>
-				{showRegister ? renderRegisterButton() : renderLoginButton()}
+			<Row style={{ paddingTop: 10 }} id="bottom-btns">
+				{renderBottomButtons()}
 			</Row>
 			<Collapse in={!!alert} timeout={300} unmountOnExit>
 				<Alert severity={alert?.status as 'success' | 'info' | 'warning' | 'error'}>
